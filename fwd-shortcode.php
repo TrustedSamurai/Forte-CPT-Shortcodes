@@ -12,7 +12,7 @@
 
 namespace fwd\short;
 
-// stop unwatned visitors calling directly
+// stop unwanted visitors calling directly
 if ( ! defined( 'ABSPATH' ) ) {
 	exit( 'Go away!' );
 }

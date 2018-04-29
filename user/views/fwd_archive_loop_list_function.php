@@ -5,66 +5,76 @@
  shortcode.  It will also restrict output to just the taxonomy specified.
 
  arguments are:
- 	posttypeslug	- what is the slug of the main posttype?
  	taxonomyslug	- slug of taxonomy stated in $args 'taxonomy' array below
+	taxonomystring	- The string within the taxonomy slug to search/filter on
 	numericsortslug - where a numeric sort is required specify the slug of the field here
+	numberofdays	- set the number of days worth of entries to display.  Defaults to 90 days.
 	filterdate 		- specify the date slug if you want to hide content earlier than today()
+	displayyear		- when displaying the event date at the front of title specify (Y/N) whether the Year should also be displayed.  Defaults to (N).
 
  */
 
      // normalize attribute keys, lowercase
     $atts = array_change_key_case((array)$atts, CASE_LOWER);
     // override default attributes with user attributes
-    $posttypeslug  		= shortcode_atts( array( 'posttypeslug' 	=> '*', ), $atts);
-    $taxonomyslug  		= shortcode_atts( array( 'taxonomyslug' 	=> '*', ), $atts);
-    $numericsortslug 	= shortcode_atts( array( 'numericsortslug' 	=> '*', ), $atts);
-    $filterdate		 	= shortcode_atts( array( 'filterdate' 		=> '2000-01-01', ), $atts);
-
-    var_dump($posttypeslug);
-
-
- 	foreach ($taxonomyslug as $a) {
- 		$taxonomylist .= $a;  // this probably won't handle an array properly yet!
- 	}
-
- 	$a='';
-	foreach ($numericsortslug as $a) { // if there are multiples of this it will break!
- 		$numericsortslugname .= $a;
- 	} 
-
- 	$a='';
-	foreach ($filterdate as $a) { // if there are multiples of this it will break!
- 		$filterdate .= $a;
- 	} 
+    $atts = shortcode_atts( array( 
+    	'posttypeslug' 		=> '', 
+    	'taxonomyslug' 		=> '',
+    	'taxonomystring'	=> '',
+    	'numericsortslug' 	=> '',
+		'numberofdays'		=> 90,
+		 'displayyear'		=> 'n',
+		'filterdate' 		=> "2000-01-01" )
+    , $atts );
+ 
+if ( ! $atts['posttypeslug'] 	|| 
+	 ! $atts['taxonomyslug'] 	||
+	 ! $atts['numericsortslug'] || 
+	 ! $atts['taxonomystring'] 
+	) {
+	echo ('Error: This shortcode requires a value for <br>
+			<strong>postypeslug</strong> = the slug of the Custom Post Type you want to list from.<br>
+			<strong>taxonomyslug</strong> = the slug of the taxonomy that you want to restrict the list to (look in CPT editor).<br>
+			<strong>taxonomystring</strong> = this is the taxonomy value itself.  ie: North or Fred.<br>
+			<strong>numericsortslug</strong> = the slug of the numeric field in your CPT to order the results by.<br>');
+	echo ( '<strong>Values parsed are: </strong><br>');
+	 echo ('posttypeslug: ' . $atts['posttypeslug']  .'<br>');
+   	 echo ('taxonomyslug: ' . $atts['taxonomyslug']  .'<br>');
+   	 echo ('taxonomystring: ' . $atts['taxonomystring']  .'<br>');
+   	 echo ('numericsortslug: ' . $atts['numericsortslug']  .'<br>');
+   	 echo ('filterdate: ' . $atts['filterdate'] ) .'<br>';
+	return;
+	}
 
 	$today = date("o-m-d");
-	$future = strtotime ( '+6 days' , strtotime ( $today ) ) ;
+	$future = strtotime ( '+'.$atts['numberofdays'].' days' , strtotime ( $today ) ) ;
 	$future = date ( 'o-m-d' , $future );
+
 
   	$args = array( 
 
-		'post_type' 		=> 'publications', 
+		'post_type' 		=> $atts['posttypeslug'],  // change this to the post type slug 
 		'post_status' 		=> 'publish',
     	'tax_query' 		=> array(                     
     	'relation' 			=> 'OR',                      
       		array(
-		        'taxonomy' 	=> 'fwd_authors',     // native slug of taxonomy (change this)        
+		        'taxonomy' 	=> $atts['taxonomyslug'],     // native slug of taxonomy (change this)        
 		        'field' 	=> 'slug',                    
-		        'terms' 	=> array( $taxonomylist )
+		        'terms' 	=> array( $atts['taxonomystring'] )
   		        )
       	),  
 
-      	// 'meta_query'  => array(
-       //   	array(
-	      //     'key'     => $filterdate,
-	      //     'value'   => array($today,$future),
-	      //     'compare' => 'BETWEEN',
-	      //     'type'    => 'DATE'
-	      //     )
-       //  ),
+      	 'meta_query'  => array(
+          	array(
+	           'key'     => $atts['filterdate'],
+	           'value'   => array($today,$future),
+	           'compare' => 'BETWEEN',
+	           'type'    => 'DATE'
+	           )
+         ),
 
 		'orderby'			=> 'meta_value meta_value_num',  // set order by a custom value text or numeric
-		'meta_key'			=> $numericsortslugname,		 // define the slug to sort by
+		'meta_key'			=> $atts['numericsortslug'],		 // define the slug to sort by
 		'order'				=> 'ASC'
 		);
 
@@ -77,7 +87,14 @@
 	            <li class="fwd_CPT_title">
 	                <!-- <p><?php the_field( 'fwd_publication_year' ); ?></p> -->
 	                <a href="<?php the_permalink($the_query->ID); ?>">
-	                <?php the_title(); ?></a>
+	                	<?php  $newsdate = get_field( fwd_news_event_date, false, false );
+							$newsdate = new DateTime( $newsdate );
+							if ( 'n' == $atts['displayyear']) {
+								echo $newsdate->format('j M');
+							} else {
+								echo $newsdate->format('j M Y');
+							}?>
+							- <?php the_title(); ?></a>
 	            </li>
         	<?php endwhile; ?>
 		</ul>
@@ -85,7 +102,7 @@
 
     	<?php wp_reset_postdata(); ?>
     <?php else: ?>
-        <h2>No Articles by this author exist</h2>
+        <p>(No Articles to display)</p>
      <?php endif; ?>
 
 
