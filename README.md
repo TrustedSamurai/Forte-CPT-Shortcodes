@@ -1,8 +1,8 @@
 # Forte CPT Shortcodes
-#
-# Decided to use GitHub to manage changes to this plugin.
-#
-# Its likely I'll continue to grow this plugin and it may fork off to different versions for different purposes.  I'd also like to not totally destroy my work with the odd glitch!  version control should help with this.
+
+Decided to use GitHub to manage changes to this plugin.
+
+Its likely I'll continue to grow this plugin and it may fork off to different versions for different purposes.  I'd also like to not totally destroy my work with the odd glitch!  version control should help with this.
 
 So far the plugin does the following:
 30/4/2018
