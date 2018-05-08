@@ -5,6 +5,7 @@
  shortcode.  It will also restrict output to just the taxonomy specified.
 
  arguments are:
+    posttypeslug		- what is the slug for the post type to be listed?
  	taxonomyslug		- slug of taxonomy stated in $args 'taxonomy' array below
 	taxonomystring		- The string within the taxonomy slug to search/filter on
 	numericsortslug 	- where a numeric sort is required specify the slug of the field here
@@ -33,6 +34,8 @@
 		'displaydate'			=> 'n',
 		'filterdate' 			=> '' )
     , $atts );
+
+ 
  
 if ( ! $atts['posttypeslug'] 	|| 
 	 ! $atts['taxonomyslug'] 	||

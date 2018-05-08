@@ -41,12 +41,17 @@ namespace fwd\short;
             <p><?php _e('by John Anderson :- Forte Web Design'); ?></p>
             <p><?php _e('This plugin allows you to generate lists of CPTs in different formats and within certain date ranges etc.  For example you might want to display a list of Posts for a single taxonomy and exclude any where the date has expired.  '); ?></p>
             
-        <h2>fwd_archive_bullet_list</h2>
+        <h2>fwd-show-postlist1</h2>
         <p>
           Lists your posts in an un-ordered list. Restrict the list by a taxonomy ie: only show me posts where the Region = "North". Restrict the list by a date range. ie: Using the Event Date field show me Posts up to 30 days ahead of today. Sorts the list in the date order of the Date field you specify.
         </p>
         <h3>Parameters</h3>
         <table class="table">
+          <tr>
+            <th>posttypeslug</th>
+            <td>slug of posttype to be displayed in this list</td>
+          </tr>
+
           <tr>
             <th>taxonomyslug</th>
             <td>slug of taxonomy stated in $args 'taxonomy' array below</td>
