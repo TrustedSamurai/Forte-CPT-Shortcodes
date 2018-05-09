@@ -12,6 +12,8 @@
 	filterdate 			- specify the date slug if you want restrict the content based on numbersofdaysfuture and numberofdayspast.
 	numberofdaysfuture	- set the number of days worth of entries to display.  Defaults to 0 (unlimited days).
 	numberofdayspast	- set the number of days worth of entries to display.  Defaults to 0 (unlimited days).
+	showthumbnail		- if a featured image exists display this on left hand side.
+	showexcerpt			- display the excerpt underneath the title.
 
 	displaydate			- when displaying the event date at the front of title specify 
 							- 'N' to hide date
@@ -32,7 +34,9 @@
 		'numberofdaysfuture'	=> 0,
 		'numberofdayspast'		=> 0,
 		'displaydate'			=> 'n',
-		'filterdate' 			=> '' )
+		'filterdate' 			=> '',
+		'showthumbnail'			=> 'n',
+		'showexcerpt'			=> 'n')
     , $atts );
 
  
@@ -53,6 +57,8 @@ if ( ! $atts['posttypeslug'] 	||
    	echo ('taxonomystring: ' 	. $atts['taxonomystring']  	.'<br>');
    	echo ('numericsortslug: ' 	. $atts['numericsortslug']  .'<br>');
    	echo ('filterdate: ' 		. $atts['filterdate'] ) 	.'<br>';
+   	echo ('showthumbnail: ' 	. $atts['showthumbnail'] ) 	.'<br>';
+   	echo ('showexcerpt: ' 		. $atts['showexcerpt'] ) 	.'<br>';
 	return;
 	}
 
@@ -117,15 +123,49 @@ if ( ! $atts['posttypeslug'] 	||
   }
 
 	$the_query = new WP_Query( $args );       
-
-	 if ( $the_query->have_posts()  ) : ?>
- 		<div class="fwd_CPT_loop_list">
+ 
+ 	 if ( $the_query->have_posts()  ) : 
+	if ( 'y' == $atts['showthumbnail'] ) { // Showthumbnail set to Show - also remove dot points and replace with divs?>
+  		<div class="fwd_CPT_loop_list">
+			<?php while ( $the_query->have_posts() ) : $the_query->the_post(); ?>
+	            <div class="fwd_CPT_title">
+	            	<div class ="fwd_CPT_Col1">
+	                	<a href="<?php the_permalink($the_query->ID); ?>">
+	                	<? the_post_thumbnail( 'large' ); ?> </a>
+	                </div>
+					<div class ="fwd_CPT_Col2">
+	                   	<a href="<?php the_permalink($the_query->ID); ?>">
+	                	<? if ( ! $atts['filterdate'] ) {
+		                		//no date available use the post publication date
+		                		$newsdate = get_the_date( 'Y-m-d' ) ;
+		                	} else {
+		                		// a date slug has been specified
+		                		$newsdate = get_field( $atts['filterdate'], false, false );
+		                	}
+							$newsdate = new DateTime( $newsdate );
+							if ( 'DM' == $atts['displaydate']) {
+								echo $newsdate->format('j M').'-';
+							} elseif ( 'DMY' == $atts['displaydate']) {
+								echo $newsdate->format('j M Y').'-';
+							} ?>
+							<?php the_title(); ?></a>
+							<?
+							if ( 'y' == $atts['showexcerpt'] ) { // showexcerpt is set to SHOW
+	                	 		the_excerpt();
+	                	 	}
+	                	 	?>
+	                </div>
+							
+	            </div>
+        	<?php endwhile; ?>
+		</div>
+<?} else {  // Showthumbnail set to HIDE - show dot points ?>
+  		<div class="fwd_CPT_loop_list">
         <ul>    
 			<?php while ( $the_query->have_posts() ) : $the_query->the_post(); ?>
-	            <li class="fwd_CPT_title">
-	                <!-- <p><?php the_field( 'fwd_publication_year' ); ?></p> -->
+	            <li class="fwd_CPT_ul_title">
 	                <a href="<?php the_permalink($the_query->ID); ?>">
-	                	<?php  
+	                	<? 
 		                	if ( ! $atts['filterdate'] ) {
 		                		//no date available use the post publication date
 		                		$newsdate = get_the_date( 'Y-m-d' ) ;
@@ -140,14 +180,21 @@ if ( ! $atts['posttypeslug'] 	||
 								echo $newsdate->format('j M Y').'-';
 							} ?>
 							<?php the_title(); ?></a>
+							<?
+							if ( 'y' == $atts['showexcerpt'] ) { // showexcerpt is set to SHOW
+	                	 		the_excerpt();
+	                	 	}
+	                	 	?>
+							
 	            </li>
         	<?php endwhile; ?>
 		</ul>
 		</div>
+	<? } ?>
 
     	<?php wp_reset_postdata(); ?>
     <?php else: ?>
         <p>(No Articles to display)</p>
-     <?php endif; ?>
-
+     <?php endif; 
+?>
 
